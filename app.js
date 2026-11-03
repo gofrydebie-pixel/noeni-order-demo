@@ -344,6 +344,7 @@
   // ---------- sheet ----------
   const sheet = $('#sheet');
   function openSheet(step) {
+    window.NTK.guideClose();
     showStep(step);
     if (!sheet.open) sheet.showModal();
     document.body.classList.add('locked');
@@ -672,6 +673,7 @@
     else if (act === 'ics') downloadIcs();
     else if (act === 'print') window.print();
     else if (act === 'new') { closeSheet(); scrollTo({ top: $('#menu').offsetTop - 8, behavior: 'smooth' }); }
+    else if (act === 'guide') openGuide();
   });
 
   document.addEventListener('change', (e) => {
@@ -715,6 +717,7 @@
     state.lang = l;
     store.set('ntk_lang', l);
     renderAll();
+    if (document.querySelector('.guide')) openGuide(); // restart it in the new language
     if (sheet.open && state.step !== 'done') showStep(state.step);
   }
 
@@ -726,10 +729,28 @@
     renderCart();
   }
 
+  // ---------- first-time guide ----------
+  function openGuide() {
+    window.NTK.guide({
+      id: 'order',
+      labels: { step: t('guideStep'), back: t('guideBack'), next: t('guideNext'), done: t('guideDone'), skip: t('guideSkip'), close: t('guideClose') },
+      steps: [
+        { title: t('g1t'), text: t('g1'), before: () => scrollTo({ top: 0, behavior: 'smooth' }) },
+        { title: t('g2t'), text: t('g2'), target: '.where' },
+        { title: t('g3t'), text: t('g3', { min: money(C.rules.minimumOrder) }), target: '#menuList .card', offset: 170 },
+        { title: t('g4t'), text: t('g4'), target: '#cartSide' },
+        { title: t('g5t'), text: t('g5') },
+      ],
+      onClose: () => { if (!state.postcode) $('#heroPostcode').focus({ preventScroll: true }); },
+    });
+  }
+
   // ---------- start ----------
   $('#heroPostcode').value = state.postcode;
   renderAll();
   setInterval(renderHero, 30000);
+  // Show the guide once to new visitors; returning customers (saved details or a past order) skip it.
+  if (!window.NTK.guideSeen('order') && !store.get('ntk_profile', null) && !store.get('ntk_last', null)) setTimeout(() => { if (!sheet.open) openGuide(); }, 900);
 
   if (C.apiUrl) {
     apiGet({ action: 'config' }).then((res) => { applyRemoteConfig(res.config); renderAll(); }).catch((err) => console.warn('Config not loaded, using defaults', err));

@@ -364,3 +364,26 @@ legend { font-weight: 700; margin-bottom: 8px; padding: 0; }
   .sheet-head, .done-actions { display: none !important; }
   .sheet-body { overflow: visible; }
 }
+
+/* First-time guide (guide.js): a card at the bottom that points at parts of the page */
+.guide { position: fixed; z-index: 90; left: 12px; right: 12px; bottom: calc(12px + var(--bar-h)); max-width: 440px; margin: 0 auto; background: var(--surface); border-radius: var(--r); box-shadow: var(--shadow-lg); border-top: 5px solid var(--gold); padding: 16px 18px 18px; display: grid; gap: 10px; }
+@media (min-width: 760px) { .guide { left: auto; right: 24px; bottom: 24px; margin: 0; } }
+.guide h2 { font-size: 22px; }
+.guide p { font-size: 16px; color: var(--ink); }
+.guide-top { display: flex; align-items: center; justify-content: space-between; }
+.guide-count { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.guide-x { border: 0; background: none; font-size: 26px; line-height: 1; width: 40px; height: 40px; margin: -8px -10px -8px 0; color: var(--muted); }
+.guide-foot { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
+.guide-foot .btn { min-height: 44px; padding: 0 18px; font-size: 15px; }
+.guide-foot .btn-primary { margin-left: auto; }
+.guide-dots { display: flex; gap: 5px; margin-right: auto; }
+.guide-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+.guide-dots i.on { background: var(--leaf); width: 18px; border-radius: 4px; }
+.guide-foot .guide-dots + .btn-primary { margin-left: 0; }
+.guide-extra { border-top: 1px solid var(--line); padding-top: 10px; }
+.guide-spot { outline: 3px solid var(--gold) !important; outline-offset: 4px; border-radius: 10px; animation: guide-pulse 1.6s ease-out 2; }
+@keyframes guide-pulse { 0% { box-shadow: 0 0 0 0 rgba(227, 199, 43, .55); } 100% { box-shadow: 0 0 0 14px rgba(227, 199, 43, 0); } }
+@media (prefers-reduced-motion: reduce) { .guide-spot { animation: none; } }
+.guide-open { display: inline-flex; gap: 6px; align-items: center; }
+.how-guide { margin-top: 22px; }
+.hero .guide-open { display: block; margin-top: 12px; }

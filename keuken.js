@@ -25,6 +25,19 @@
       startRun: 'Start de route', started: 'Route gestart om {time}', next: 'Volgende stop', markDelivered: '✓ Geleverd', deliveredAt: 'Geleverd {time}',
       undo: 'Ongedaan maken', trackPage: 'Volgpagina klant',
       startConfirm: 'Klanten zien vanaf nu hoeveel stops er nog voor hen zijn, in deze volgorde. Route starten?',
+      help: 'Uitleg', practice: 'Oefenen met voorbeeldbestellingen', practiceLogin: 'Eerst oefenen? Probeer alles uit met voorbeeldbestellingen.',
+      practiceBar: 'Oefenmodus: voorbeeldbestellingen. Niets wordt echt bewaard of gemaild.', practiceStop: 'Stop met oefenen',
+      gStep: 'Stap {n} van {total}', gBack: 'Vorige', gNext: 'Volgende', gDone: 'Klaar', gSkip: 'Overslaan', gClose: 'Sluiten',
+      k1t: 'Welkom in je keuken', k1: 'Dit scherm werkt op gsm en computer. In een minuut zie je wat alles doet.',
+      k2t: 'Leverdag en route', k2: 'Kies bovenaan de leverdag en eventueel één route. Alles hieronder past zich aan. Met Vernieuwen haal je nieuwe bestellingen op.',
+      k3t: 'Overzicht', k3: 'Hoeveel bestellingen en gerechten, de omzet, wat nog betaald moet worden en hoeveel er al geleverd zijn.',
+      k4t: 'Kookplan', k4: 'Hoeveel je van elk gerecht maakt, per formaat. In het rood staan allergieën en wensen, met de naam van de klant.',
+      k5t: 'Leverlijst', k5: 'Per route alle stops, in rijvolgorde. Met "Route in Google Maps" open je de hele route om te navigeren. Tik op een adres of nummer om te navigeren of te bellen.',
+      k6t: 'Leveruren mailen', k6: 'De dag voor levering: vul per stop een uur in, bv. 14:00–14:30, en druk op "Stuur uur-mails". Elke klant krijgt een mail in de eigen taal, met een link om de levering te volgen.',
+      k7t: 'Start de route', k7: 'Vertrek je met de bestellingen? Druk op "Start de route". Vanaf dan zien klanten hoeveel stops er nog voor hen zijn.',
+      k8t: 'Geleverd aantikken', k8: 'Na elke stop druk je op de grote groene knop "Geleverd". De volgende stop kleurt geel. Per ongeluk getikt? Druk op "Ongedaan maken".',
+      k9t: 'Bestellingen', k9: 'Zoek op naam, nummer of gemeente en vink betaald of geleverd aan. Alles komt ook in de Google Sheet.',
+      k10t: 'Afdrukken en Excel', k10: 'Druk pakbonnen af om op elke zak te kleven, of download de bestellingen van de dag als Excel-bestand. Deze uitleg vind je altijd terug via de knop "Uitleg".',
     },
     en: {
       kitchen: 'Kitchen', loginTitle: 'Kitchen', loginText: 'Enter the kitchen key. You find it in the Google Sheet, tab Settings.',
@@ -44,16 +57,31 @@
       startRun: 'Start the route', started: 'Route started at {time}', next: 'Next stop', markDelivered: '✓ Delivered', deliveredAt: 'Delivered {time}',
       undo: 'Undo', trackPage: 'Customer tracking page',
       startConfirm: 'From now on customers see how many stops are before them, in this order. Start the route?',
+      help: 'Guide', practice: 'Practise with sample orders', practiceLogin: 'Want to practise first? Try everything with sample orders.',
+      practiceBar: 'Practice mode: sample orders. Nothing is really saved or emailed.', practiceStop: 'Stop practising',
+      gStep: 'Step {n} of {total}', gBack: 'Back', gNext: 'Next', gDone: 'Done', gSkip: 'Skip', gClose: 'Close',
+      k1t: 'Welcome to your kitchen', k1: 'This screen works on phone and computer. In a minute you’ll see what everything does.',
+      k2t: 'Delivery day and route', k2: 'Choose the delivery day at the top, and one route if you like. Everything below follows. Refresh fetches new orders.',
+      k3t: 'Overview', k3: 'How many orders and dishes, the revenue, what is still to be paid and how many are delivered.',
+      k4t: 'Cooking list', k4: 'How much of each dish to make, per size. Allergies and wishes are in red, with the customer’s name.',
+      k5t: 'Delivery list', k5: 'All stops per route, in driving order. "Route in Google Maps" opens the whole route to navigate. Tap an address or number to navigate or call.',
+      k6t: 'Email arrival times', k6: 'The day before delivery: fill in a time per stop, e.g. 14:00–14:30, and press "Send arrival-time emails". Each customer gets an email in their language, with a link to follow the delivery.',
+      k7t: 'Start the route', k7: 'Leaving with the orders? Press "Start the route". From then on customers see how many stops are before them.',
+      k8t: 'Tick off deliveries', k8: 'After each stop, press the big green "Delivered" button. The next stop turns gold. Tapped by mistake? Press "Undo".',
+      k9t: 'Orders', k9: 'Search by name, number or town and tick paid or delivered. Everything also goes into the Google Sheet.',
+      k10t: 'Printing and Excel', k10: 'Print packing slips to stick on each bag, or download the day’s orders as an Excel file. You can always find this guide again with the "Guide" button.',
     },
   };
 
   const state = {
+    practice: false, // session only, never remembered: a real route day must never show sample data
     lang: store.get('ntk_k_lang', 'nl'),
     key: store.get('ntk_k_key', ''),
     orders: [],
     runs: {}, // "date|route" -> { started, order: [ids] }
     day: '', route: 'all', tab: store.get('ntk_k_tab', 'cook'), q: '',
   };
+  const local = () => !C.apiUrl || state.practice;
   const t = (k, v = {}) => Object.entries(v).reduce((s, [a, b]) => s.replaceAll(`{${a}}`, b), TXT[state.lang][k] ?? k);
   const money = (n) => fmt(Number(n) || 0, state.lang === 'nl' ? 'nl-BE' : 'en-GB');
   const dayLabel = (d) => new Intl.DateTimeFormat(state.lang === 'nl' ? 'nl-BE' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long' }).format(parseDay(d));
@@ -70,7 +98,7 @@
 
   // ---------- data ----------
   async function load() {
-    if (!C.apiUrl) { state.orders = window.NTK_DEMO.orders(); state.runs = window.NTK_DEMO.runs(); return; }
+    if (local()) { state.orders = window.NTK_DEMO.orders(); state.runs = window.NTK_DEMO.runs(); return; }
     const res = await apiGet({ action: 'orders', key: state.key }, { timeout: 20000 });
     state.orders = res.orders;
     state.runs = res.runs || {};
@@ -80,7 +108,7 @@
     const order = stopOrder(route, current().filter((o) => o.route === route)).map((o) => o.id);
     if (!confirm(t('startConfirm'))) return;
     const run = { started: new Date().toISOString(), order };
-    if (!C.apiUrl) window.NTK_DEMO.saveRun(state.day, route, run);
+    if (local()) window.NTK_DEMO.saveRun(state.day, route, run);
     else {
       try { Object.assign(run, (await api({ action: 'startRun', key: state.key, date: state.day, route, order })).run); } catch { return toast(t('saveErr')); }
     }
@@ -91,7 +119,7 @@
   async function save(id, patch) {
     const o = state.orders.find((x) => x.id === id);
     Object.assign(o, patch);
-    if (!C.apiUrl) {
+    if (local()) {
       const over = store.get('ntk_demo_over', {});
       over[id] = { ...(over[id] || {}), ...patch };
       store.set('ntk_demo_over', over);
@@ -203,7 +231,7 @@
             <div class="stop-ctrl">
               ${isPickup ? '' : `<label>${esc(t('eta'))} <input type="text" data-eta="${esc(o.id)}" value="${esc(o.eta || '')}" placeholder="${esc(t('etaPh'))}"></label>${o.etaSent ? ' ✓' : ''}`}
               <label class="check small"><input type="checkbox" data-flag="paid" data-id="${esc(o.id)}"${o.paid ? ' checked' : ''}><span>${esc(t('paid'))}</span></label>
-              ${!isPickup && o.track ? `<a class="small" href="track.html?t=${encodeURIComponent(o.track)}&lang=${esc(o.lang || 'nl')}" target="_blank" rel="noopener">${esc(t('trackPage'))} ↗</a>` : ''}
+              ${!isPickup && o.track && !(C.apiUrl && state.practice) ? `<a class="small" href="track.html?t=${encodeURIComponent(o.track)}&lang=${esc(o.lang || 'nl')}" target="_blank" rel="noopener">${esc(t('trackPage'))} ↗</a>` : ''}
             </div>
             <div class="stop-done">${o.delivered
               ? `<span class="tag paid">${esc(o.deliveredAt ? t('deliveredAt', { time: clock(o.deliveredAt) }) : t('delivered'))}</span> <button type="button" class="btn-link small" data-act="undeliver" data-id="${esc(o.id)}">${esc(t('undo'))}</button>`
@@ -261,8 +289,11 @@
     document.documentElement.lang = state.lang;
     $$('[data-t]').forEach((el) => { el.textContent = t(el.dataset.t); });
     $$('.lang button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === state.lang)));
-    $('#demoBar').hidden = Boolean(C.apiUrl);
-    $('#demoBar').textContent = t('demo');
+    $('#demoBar').hidden = !local();
+    $('#demoBar').innerHTML = state.practice && C.apiUrl
+      ? `${esc(t('practiceBar'))} <button type="button" class="btn-link small" data-act="practice-stop">${esc(t('practiceStop'))}</button>`
+      : esc(t('demo'));
+    $('#practiceLogin').hidden = !C.apiUrl;
   }
 
   // ---------- actions ----------
@@ -284,7 +315,7 @@
     const ready = list.filter((o) => o.eta && !o.etaSent);
     if (!ready.length) return toast(t('etaNone'));
     if (!confirm(t('etaConfirm', { n: ready.length }))) return;
-    if (!C.apiUrl) {
+    if (local()) {
       ready.forEach((o) => { o.etaSent = true; });
       toast(t('etaDemo', { n: ready.length }));
       return render();
@@ -309,6 +340,7 @@
       $('#login').hidden = true;
       $('#dash').hidden = false;
       render();
+      if (!window.NTK.guideSeen('kitchen')) setTimeout(openGuide, 500);
     } catch (err) {
       const wrong = /key/.test(err.message);
       if (wrong) store.del('ntk_k_key');
@@ -329,6 +361,8 @@
     if (el.dataset.tab) { state.tab = el.dataset.tab; store.set('ntk_k_tab', state.tab); render(); }
     if (el.dataset.act === 'eta') sendEta(el.dataset.route);
     if (el.dataset.act === 'start') startRun(el.dataset.route);
+    if (el.dataset.act === 'practice') { window.NTK.guideClose(); setPractice(true); }
+    if (el.dataset.act === 'practice-stop') setPractice(false);
     if (el.dataset.act === 'deliver' || el.dataset.act === 'undeliver') setDelivered(el.dataset.id, el.dataset.act === 'deliver');
   });
   // The server stamps its own time; the local stamp is only for showing it straight away.
@@ -350,6 +384,7 @@
   $('#day').addEventListener('change', (e) => { state.day = e.target.value; state.route = 'all'; render(); });
   $('#route').addEventListener('change', (e) => { state.route = e.target.value; render(); });
   $('#refresh').addEventListener('click', refresh);
+  $('#help').addEventListener('click', openGuide);
   $('#csv').addEventListener('click', exportCsv);
   $('#printSlips').addEventListener('click', () => window.print());
   $('#loginForm').addEventListener('submit', (e) => {
@@ -358,6 +393,36 @@
     store.set('ntk_k_key', state.key);
     refresh();
   });
+
+  // ---------- practice mode and first-time guide ----------
+  function setPractice(on) {
+    if (!C.apiUrl) return; // demo mode already uses sample orders
+    state.practice = on;
+    if (!on) ['ntk_demo_over', 'ntk_demo_runs'].forEach((k) => store.del(k)); // start fresh next time
+    applyText();
+    if (on || state.key) refresh(); else showLogin();
+  }
+
+  function openGuide() {
+    const go = (tab) => () => { if (state.tab !== tab) { state.tab = tab; store.set('ntk_k_tab', tab); render(); } };
+    window.NTK.guide({
+      id: 'kitchen',
+      labels: { step: t('gStep'), back: t('gBack'), next: t('gNext'), done: t('gDone'), skip: t('gSkip'), close: t('gClose') },
+      steps: [
+        { title: t('k1t'), text: t('k1'), before: () => { go('cook')(); scrollTo({ top: 0, behavior: 'smooth' }); } },
+        { title: t('k2t'), text: t('k2'), target: '.k-toolbar' },
+        { title: t('k3t'), text: t('k3'), target: '#stats' },
+        { title: t('k4t'), text: t('k4'), target: '#tab-cook', before: go('cook') },
+        { title: t('k5t'), text: t('k5'), target: '#tab-deliver .route-head', before: go('deliver') },
+        { title: t('k6t'), text: t('k6'), target: '#tab-deliver .stop-ctrl label', before: go('deliver') },
+        { title: t('k7t'), text: t('k7'), target: '#tab-deliver [data-act="start"], #tab-deliver .run-tag', before: go('deliver') },
+        { title: t('k8t'), text: t('k8'), target: '#tab-deliver .stop-done', before: go('deliver') },
+        { title: t('k9t'), text: t('k9'), target: '#tab-orders', before: go('orders') },
+        { title: t('k10t'), text: t('k10'), target: '.k-actions', before: go('cook'),
+          extra: C.apiUrl && !state.practice ? `<button type="button" class="btn btn-gold btn-block" data-act="practice">${esc(t('practice'))}</button>` : '' },
+      ],
+    });
+  }
 
   // ---------- start ----------
   applyText();
