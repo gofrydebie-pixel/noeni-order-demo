@@ -39,6 +39,12 @@
 .stop { background: var(--surface); border-radius: var(--r-sm); box-shadow: var(--shadow); padding: 12px 14px; display: grid; gap: 8px; grid-template-columns: 34px 1fr; counter-increment: stop; }
 .stop::before { content: counter(stop); width: 30px; height: 30px; border-radius: 50%; background: var(--olive); color: var(--gold); display: grid; place-items: center; font-weight: 800; }
 .stop.is-done { opacity: .55; }
+.stop.is-next { outline: 3px solid var(--gold); }
+.stop.is-next::before { background: var(--gold); color: var(--olive-ink); }
+.stop-done { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 6px; }
+.btn-deliver { min-height: 48px; padding: 0 22px; font-size: 16px; }
+.next-tag { background: var(--gold); color: var(--olive-ink); }
+.run-tag { background: var(--leaf-soft); color: var(--leaf-hover); font-size: 13px; padding: 8px 12px; }
 .stop-main { display: grid; gap: 4px; min-width: 0; }
 .stop-top { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
 .stop-top strong { font-size: 17px; }

@@ -22,6 +22,9 @@
       etaConfirm: '{n} klanten krijgen een mail met hun leveruur. Doorgaan?', saved: 'Bewaard', saveErr: 'Bewaren mislukt',
       search: 'Zoek naam, nummer, gemeente…', order: 'Bestelling', customer: 'Klant', total: 'Totaal', payment: 'Betaling', status: 'Status',
       toPay: 'TE BETALEN', isPaid: 'BETAALD', ref: 'Mededeling', remarks: 'Opmerking', phone: 'Tel', logout: 'Afmelden',
+      startRun: 'Start de route', started: 'Route gestart om {time}', next: 'Volgende stop', markDelivered: '✓ Geleverd', deliveredAt: 'Geleverd {time}',
+      undo: 'Ongedaan maken', trackPage: 'Volgpagina klant',
+      startConfirm: 'Klanten zien vanaf nu hoeveel stops er nog voor hen zijn, in deze volgorde. Route starten?',
     },
     en: {
       kitchen: 'Kitchen', loginTitle: 'Kitchen', loginText: 'Enter the kitchen key. You find it in the Google Sheet, tab Settings.',
@@ -38,6 +41,9 @@
       etaConfirm: '{n} customers will get an email with their delivery time. Continue?', saved: 'Saved', saveErr: 'Saving failed',
       search: 'Search name, number, town…', order: 'Order', customer: 'Customer', total: 'Total', payment: 'Payment', status: 'Status',
       toPay: 'TO PAY', isPaid: 'PAID', ref: 'Reference', remarks: 'Note', phone: 'Phone', logout: 'Log out',
+      startRun: 'Start the route', started: 'Route started at {time}', next: 'Next stop', markDelivered: '✓ Delivered', deliveredAt: 'Delivered {time}',
+      undo: 'Undo', trackPage: 'Customer tracking page',
+      startConfirm: 'From now on customers see how many stops are before them, in this order. Start the route?',
     },
   };
 
@@ -45,6 +51,7 @@
     lang: store.get('ntk_k_lang', 'nl'),
     key: store.get('ntk_k_key', ''),
     orders: [],
+    runs: {}, // "date|route" -> { started, order: [ids] }
     day: '', route: 'all', tab: store.get('ntk_k_tab', 'cook'), q: '',
   };
   const t = (k, v = {}) => Object.entries(v).reduce((s, [a, b]) => s.replaceAll(`{${a}}`, b), TXT[state.lang][k] ?? k);
@@ -63,9 +70,22 @@
 
   // ---------- data ----------
   async function load() {
-    if (!C.apiUrl) { state.orders = demoOrders(); return; }
+    if (!C.apiUrl) { state.orders = window.NTK_DEMO.orders(); state.runs = window.NTK_DEMO.runs(); return; }
     const res = await apiGet({ action: 'orders', key: state.key }, { timeout: 20000 });
     state.orders = res.orders;
+    state.runs = res.runs || {};
+  }
+
+  async function startRun(route) {
+    const order = stopOrder(route, current().filter((o) => o.route === route)).map((o) => o.id);
+    if (!confirm(t('startConfirm'))) return;
+    const run = { started: new Date().toISOString(), order };
+    if (!C.apiUrl) window.NTK_DEMO.saveRun(state.day, route, run);
+    else {
+      try { Object.assign(run, (await api({ action: 'startRun', key: state.key, date: state.day, route, order })).run); } catch { return toast(t('saveErr')); }
+    }
+    state.runs[`${state.day}|${route}`] = run;
+    render();
   }
 
   async function save(id, patch) {
@@ -144,24 +164,36 @@
     return out;
   }
 
+  const clock = (iso) => (iso ? new Intl.DateTimeFormat(state.lang === 'nl' ? 'nl-BE' : 'en-GB', { hour: '2-digit', minute: '2-digit' }).format(new Date(iso)) : '');
+
+  // Stop order: as saved when the route was started, otherwise by postcode and street.
+  function stopOrder(route, os) {
+    const run = state.runs[`${state.day}|${route}`];
+    const pos = (o) => { const i = run ? run.order.indexOf(o.id) : -1; return i < 0 ? 1e6 : i; };
+    return os.slice().sort((a, b) => pos(a) - pos(b) || (a.postcode || '').localeCompare(b.postcode || '') || (a.street || '').localeCompare(b.street || ''));
+  }
+
   function renderDeliver(list) {
     const groups = {};
     for (const o of list) (groups[o.route] = groups[o.route] || []).push(o);
     $('#tab-deliver').innerHTML = Object.entries(groups).sort(([a], [b]) => (a === 'pickup') - (b === 'pickup') || a.localeCompare(b)).map(([route, os]) => {
-      const sorted = os.sort((a, b) => (a.postcode || '').localeCompare(b.postcode || '') || (a.street || '').localeCompare(b.street || ''));
+      const sorted = stopOrder(route, os);
       const isPickup = route === 'pickup';
       const links = isPickup ? [] : mapsLinks(sorted);
+      const run = state.runs[`${state.day}|${route}`];
+      const nextId = run?.started ? sorted.find((o) => !o.delivered)?.id : '';
       return `<div class="route-block">
         <div class="route-head">
           <h2>${esc(routeLabel(route))} <span class="muted">(${sorted.length})</span></h2>
           <div class="btns">
+            ${isPickup ? '' : run?.started ? `<span class="tag run-tag">${esc(t('started', { time: clock(run.started) }))}</span>` : `<button type="button" class="btn btn-gold" data-act="start" data-route="${route}">${esc(t('startRun'))}</button>`}
             ${links.map((u, i) => `<a class="btn btn-ghost" href="${esc(u)}" target="_blank" rel="noopener">${esc(links.length > 1 ? t('mapsPart', { n: i + 1 }) : t('maps'))}</a>`).join('')}
             ${isPickup ? '' : `<button type="button" class="btn btn-dark" data-act="eta" data-route="${route}">${esc(t('sendEta'))}</button>`}
           </div>
         </div>
-        <ol class="stops">${sorted.map((o) => `<li class="stop${o.delivered ? ' is-done' : ''}">
+        <ol class="stops">${sorted.map((o) => `<li class="stop${o.delivered ? ' is-done' : ''}${o.id === nextId ? ' is-next' : ''}">
           <div class="stop-main">
-            <div class="stop-top"><strong>${esc(o.name)}</strong><span class="stop-id">${esc(o.id)}</span>
+            <div class="stop-top">${o.id === nextId ? `<span class="tag next-tag">${esc(t('next'))}</span>` : ''}<strong>${esc(o.name)}</strong><span class="stop-id">${esc(o.id)}</span>
               <span class="tag ${o.paid ? 'paid' : 'unpaid'}">${esc(o.paid ? t('paid') : `${t('unpaid')} · ${t(`pay_${o.payment}`)}`)}</span>
               <strong>${esc(money(o.total))}</strong></div>
             ${isPickup ? '' : `<a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr(o))}" target="_blank" rel="noopener">${esc(addr(o))}</a>`}
@@ -171,8 +203,11 @@
             <div class="stop-ctrl">
               ${isPickup ? '' : `<label>${esc(t('eta'))} <input type="text" data-eta="${esc(o.id)}" value="${esc(o.eta || '')}" placeholder="${esc(t('etaPh'))}"></label>${o.etaSent ? ' ✓' : ''}`}
               <label class="check small"><input type="checkbox" data-flag="paid" data-id="${esc(o.id)}"${o.paid ? ' checked' : ''}><span>${esc(t('paid'))}</span></label>
-              <label class="check small"><input type="checkbox" data-flag="delivered" data-id="${esc(o.id)}"${o.delivered ? ' checked' : ''}><span>${esc(t('delivered'))}</span></label>
+              ${!isPickup && o.track ? `<a class="small" href="track.html?t=${encodeURIComponent(o.track)}&lang=${esc(o.lang || 'nl')}" target="_blank" rel="noopener">${esc(t('trackPage'))} ↗</a>` : ''}
             </div>
+            <div class="stop-done">${o.delivered
+              ? `<span class="tag paid">${esc(o.deliveredAt ? t('deliveredAt', { time: clock(o.deliveredAt) }) : t('delivered'))}</span> <button type="button" class="btn-link small" data-act="undeliver" data-id="${esc(o.id)}">${esc(t('undo'))}</button>`
+              : `<button type="button" class="btn btn-primary btn-deliver" data-act="deliver" data-id="${esc(o.id)}">${esc(t('markDelivered'))}</button>`}</div>
           </div>
         </li>`).join('')}</ol>
       </div>`;
@@ -293,10 +328,15 @@
     if (el.dataset.lang) { state.lang = el.dataset.lang; store.set('ntk_k_lang', state.lang); applyText(); if (!$('#dash').hidden) render(); }
     if (el.dataset.tab) { state.tab = el.dataset.tab; store.set('ntk_k_tab', state.tab); render(); }
     if (el.dataset.act === 'eta') sendEta(el.dataset.route);
+    if (el.dataset.act === 'start') startRun(el.dataset.route);
+    if (el.dataset.act === 'deliver' || el.dataset.act === 'undeliver') setDelivered(el.dataset.id, el.dataset.act === 'deliver');
   });
+  // The server stamps its own time; the local stamp is only for showing it straight away.
+  const setDelivered = (id, on) => save(id, { delivered: on, deliveredAt: on ? new Date().toISOString() : '' }).then(render);
   document.addEventListener('change', (e) => {
     const el = e.target;
-    if (el.dataset.flag) { save(el.dataset.id, { [el.dataset.flag]: el.checked }).then(render); }
+    if (el.dataset.flag === 'delivered') setDelivered(el.dataset.id, el.checked);
+    else if (el.dataset.flag) { save(el.dataset.id, { [el.dataset.flag]: el.checked }).then(render); }
     if (el.dataset.eta !== undefined) save(el.dataset.eta, { eta: el.value.trim() });
   });
   document.addEventListener('input', (e) => {
@@ -318,48 +358,6 @@
     store.set('ntk_k_key', state.key);
     refresh();
   });
-
-  // ---------- demo data ----------
-  function demoOrders() {
-    const first = ['Lotte', 'Wout', 'Sarah', 'Jens', 'Elke', 'Pieter', 'Marie', 'Tom', 'Fien', 'Arne', 'Nathalie', 'Bram', 'Ines', 'Koen', 'Lien', 'Ruben'];
-    const last = ['Peeters', 'Janssens', 'Maes', 'Claes', 'Wouters', 'De Smet', 'Willems', 'Goossens', 'Mertens', 'Dubois', 'Lambert', 'Desmet', 'Van Damme', 'Hermans', 'Martens', 'Verbeke'];
-    const towns = [['9000', 'Gent'], ['9050', 'Gentbrugge'], ['9051', 'Sint-Denijs-Westrem'], ['9030', 'Mariakerke'], ['9820', 'Merelbeke'], ['9200', 'Dendermonde'], ['9300', 'Aalst'], ['9700', 'Oudenaarde'], ['9100', 'Sint-Niklaas'], ['9800', 'Deinze']];
-    const streets = ['Kerkstraat', 'Stationsstraat', 'Molenstraat', 'Schoolstraat', 'Dorpsstraat', 'Nieuwstraat', 'Kapellestraat', 'Veldstraat'];
-    const picks = [['padthai', 'm'], ['padthai', 'l'], ['panang', 'm'], ['massaman', 'l'], ['khaosoy', 'm'], ['pho', 'm'], ['guaytiao', 'l'], ['zoetzuur', 'm'], ['kanomjeen', 'm'], ['tomkha', 'x'], ['tomyam', 'x'], ['verseloempia', 'x'], ['loempia', 'x'], ['kimchi', 'x'], ['tiramisu', 'x'], ['kanomchan', 'x'], ['portie', 'rijst']];
-    const notes = ['', '', '', '', 'Graag extra pikant', 'Zonder pinda', '', 'Extra limoen'];
-    let seed = 7;
-    const rnd = (n) => { seed = (seed * 9301 + 49297) % 233280; return Math.floor((seed / 233280) * n); };
-    const date = '2026-11-07';
-    const out = [];
-    for (let i = 0; i < 16; i++) {
-      const pickup = i % 6 === 5;
-      const lines = [];
-      let subtotal = 0;
-      while (subtotal < 35 + rnd(40)) {
-        const [id, variant] = picks[rnd(picks.length)];
-        const item = MENU.find((x) => x.id === id);
-        const v = item.variants.find((x) => x.id === variant);
-        const ex = lines.find((l) => l.id === id && l.variant === variant);
-        if (ex) ex.qty++; else lines.push({ id, variant, qty: 1 + rnd(2), price: v.price, note: item.spicy || id === 'padthai' ? notes[rnd(notes.length)] : '' });
-        subtotal = lines.reduce((s, l) => s + l.qty * l.price, 0);
-      }
-      const fee = pickup ? 0 : subtotal >= 90 ? 0 : subtotal >= 70 ? 2 : 3;
-      const [pc, city] = towns[rnd(towns.length)];
-      const payment = ['cash', 'payconiq', 'transfer'][rnd(3)];
-      out.push({
-        id: `NTK-1107-${String(i + 1).padStart(3, '0')}`, date, route: pickup ? 'pickup' : 'ovl', method: pickup ? 'pickup' : 'delivery',
-        name: `${first[i]} ${last[rnd(last.length)]}`, email: `${first[i].toLowerCase()}@example.com`, phone: `04${70 + rnd(29)} ${10 + rnd(89)} ${10 + rnd(89)} ${10 + rnd(89)}`,
-        street: pickup ? '' : `${streets[rnd(streets.length)]} ${1 + rnd(120)}`, postcode: pickup ? '' : pc, city: pickup ? '' : city,
-        subtotal, fee, total: subtotal + fee, payment, ogm: window.NTK.ogm(`261107${String(i + 1).padStart(4, '0')}`),
-        paid: payment === 'transfer' && rnd(2) === 1, delivered: false, eta: '', etaSent: false,
-        remarks: i === 2 ? 'Bel aan bij de buren als niemand thuis is' : i === 9 ? 'Poortcode 1234' : '', lines,
-      });
-    }
-    // Orders placed on this device in demo mode
-    for (const o of store.get('ntk_demo_orders', [])) out.push({ ...o, lines: o.lines });
-    const over = store.get('ntk_demo_over', {});
-    return out.map((o) => ({ ...o, ...(over[o.id] || {}) }));
-  }
 
   // ---------- start ----------
   applyText();

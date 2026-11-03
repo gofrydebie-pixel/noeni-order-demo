@@ -1,0 +1,44 @@
+/* Delivery tracking page — extends styles.css */
+.t-main { max-width: 620px; padding-top: 24px; padding-bottom: 64px; display: grid; gap: 16px; }
+.t-card { background: var(--surface); border-radius: var(--r); box-shadow: var(--shadow); padding: 20px; display: grid; gap: 18px; }
+.t-kicker { font-size: 14px; font-weight: 600; color: var(--muted); }
+.t-title h1 { font-size: 30px; }
+.t-title p { margin-top: 6px; font-size: 17px; }
+
+/* Checkpoints */
+.t-steps { list-style: none; margin: 0; padding: 0; display: grid; }
+.t-step { display: grid; grid-template-columns: 32px 1fr; gap: 12px; position: relative; padding-bottom: 18px; }
+.t-step:last-child { padding-bottom: 0; }
+.t-step::after { content: ''; position: absolute; left: 15px; top: 32px; bottom: 0; width: 2px; background: var(--line); }
+.t-step:last-child::after { display: none; }
+.t-step.done::after { background: var(--leaf); }
+.t-dot { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--bg); border: 2px solid var(--line); color: var(--muted); font-weight: 800; font-size: 14px; position: relative; z-index: 1; }
+.t-step.done .t-dot { background: var(--leaf); border-color: var(--leaf); color: #fff; }
+.t-step.now .t-dot { background: var(--gold); border-color: var(--gold); color: var(--olive-ink); box-shadow: 0 0 0 5px var(--gold-soft); }
+.t-step b { display: block; padding-top: 4px; }
+.t-sub { display: block; font-size: 15px; color: var(--muted); }
+.t-count { display: block; margin-top: 4px; }
+.t-step.todo b { color: var(--muted); font-weight: 600; }
+
+/* One segment per stop: delivered, still to go, and yours */
+.t-bar { display: flex; gap: 3px; margin-top: 10px; }
+.t-bar i { flex: 1; height: 10px; border-radius: 3px; background: var(--line); }
+.t-bar i.done { background: var(--leaf); }
+.t-bar i.me { background: var(--gold); outline: 2px solid var(--olive); outline-offset: 1px; }
+.t-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+.t-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; background: var(--line); }
+.t-legend i.done { background: var(--leaf); }
+.t-legend i.me { background: var(--gold); }
+
+.t-facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; }
+.t-facts div { background: var(--bg); border-radius: var(--r-sm); padding: 10px 12px; }
+.t-facts dt { font-size: 13px; font-weight: 600; color: var(--muted); }
+.t-facts dd { margin: 2px 0 0; font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.t-note { font-size: 14px; color: var(--muted); }
+.t-error h1 { font-size: 24px; }
+.t-help { font-size: 15px; }
+.t-help a { font-weight: 700; }
+
+.demo-bar { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
+.t-demo-pick { display: inline-flex; gap: 6px; align-items: center; font-weight: 600; }
+.t-demo-pick select { font-size: 14px; padding: 4px 6px; border-radius: 6px; border: 1px solid #d6cf8f; background: #fff; max-width: 220px; }

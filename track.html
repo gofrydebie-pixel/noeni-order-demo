@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="nl-BE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Volg je levering · Noeni Thai Kitchen</title>
+  <meta name="theme-color" content="#473f00">
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="track.css">
+</head>
+<body>
+  <div class="demo-bar" id="demoBar" hidden>
+    <span id="demoText"></span>
+    <label class="t-demo-pick"><span id="demoPickLabel"></span> <select id="demoPick"></select></label>
+  </div>
+  <header class="top">
+    <div class="wrap top-in">
+      <a class="brand" href="index.html" aria-label="Noeni Thai Kitchen">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">Noeni Thai<small>Kitchen</small></span>
+      </a>
+      <div class="lang" role="group" aria-label="Taal / Langue / Language">
+        <button type="button" data-lang="nl">NL</button>
+        <button type="button" data-lang="fr">FR</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap t-main">
+    <p class="muted" id="loading"></p>
+    <section class="t-card" id="card" hidden aria-live="polite"></section>
+    <section class="t-card t-error" id="error" hidden></section>
+    <p class="t-help" id="help" hidden></p>
+  </main>
+
+  <script src="config.js" defer></script>
+  <script src="menu.js" defer></script>
+  <script src="shared.js" defer></script>
+  <script src="demo.js" defer></script>
+  <script src="track.js" defer></script>
+</body>
+</html>
