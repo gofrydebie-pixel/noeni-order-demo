@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="nl-BE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Noeni Thai Kitchen · Bestellen</title>
+  <meta name="description" content="Vegan Thaise gerechten van Noeni Thai Kitchen, geleverd in Vlaanderen en Brabant. Bestel online.">
+  <meta name="theme-color" content="#473f00">
+  <meta property="og:title" content="Noeni Thai Kitchen · 100% vegan · 100% aroy">
+  <meta property="og:description" content="Thaise thuiskeuken, 100% vegan, tot aan je deur. Bestel online.">
+  <meta property="og:image" content="https://gofrydebie-pixel.github.io/noeni-order-demo/img/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip" href="#menu">Menu</a>
+  <div class="demo-bar" id="demoBar" hidden></div>
+  <div class="banner" id="banner" hidden></div>
+
+  <header class="top">
+    <div class="wrap top-in">
+      <a class="brand" href="#" aria-label="Noeni Thai Kitchen">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">Noeni Thai<small>Kitchen</small></span>
+      </a>
+      <nav class="top-nav" aria-label="Navigatie">
+        <a href="#menu" data-t="menuTitle"></a>
+        <a href="#how" data-t="howTitle"></a>
+        <a href="#info" data-t="infoTitle"></a>
+      </nav>
+      <div class="lang" role="group" aria-label="Taal / Langue / Language">
+        <button type="button" data-lang="nl">NL</button>
+        <button type="button" data-lang="fr">FR</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap hero-in">
+      <div class="hero-text">
+        <p class="eyebrow" data-t="tagline"></p>
+        <h1 data-t="heroTitle"></h1>
+        <p class="lead" data-t="heroText"></p>
+
+        <div class="where">
+          <label for="heroPostcode" class="where-label" data-t="postcodeLabel"></label>
+          <div class="where-row">
+            <input id="heroPostcode" inputmode="numeric" autocomplete="postal-code" maxlength="4" pattern="[0-9]{4}">
+            <a class="btn btn-gold" href="#menu" data-t="seeMenu"></a>
+          </div>
+          <p class="where-hint" id="heroHint" data-t="postcodeHint"></p>
+          <div class="next" id="nextBox" aria-live="polite"></div>
+        </div>
+        <button type="button" class="btn-link reorder" id="reorderBtn" hidden data-t="reorder"></button>
+      </div>
+      <div class="hero-photos" aria-hidden="true">
+        <img src="img/padthai.jpg" alt="" class="p1">
+        <img src="img/panang.jpg" alt="" class="p2">
+        <img src="img/verseloempia.jpg" alt="" class="p3">
+      </div>
+    </div>
+  </section>
+
+  <div class="late" id="lateBox" hidden>
+    <div class="wrap late-in">
+      <div>
+        <strong data-t="closedTitle"></strong>
+        <span id="lateText"></span>
+      </div>
+      <a class="btn btn-dark" id="lateCall" href="#" data-t="call"></a>
+    </div>
+  </div>
+
+  <main class="wrap layout" id="menu">
+    <div class="menu-col">
+      <div class="menu-head">
+        <h2 data-t="menuTitle"></h2>
+        <p class="muted" data-t="menuIntro"></p>
+      </div>
+
+      <div class="filters" id="filters">
+        <div class="chips" id="catChips" role="tablist"></div>
+        <div class="filter-row">
+          <label class="search">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" id="search" autocomplete="off">
+          </label>
+          <label class="toggle">
+            <input type="checkbox" id="notSpicy">
+            <span data-t="notSpicy"></span>
+          </label>
+        </div>
+      </div>
+
+      <div id="menuList"></div>
+      <p class="muted empty-results" id="noResults" hidden data-t="noResults"></p>
+    </div>
+
+    <aside class="cart-col" aria-label="Winkelmand">
+      <div class="cart-card" id="cartSide"></div>
+    </aside>
+  </main>
+
+  <section class="how" id="how">
+    <div class="wrap">
+      <h2 data-t="howTitle"></h2>
+      <ol class="steps">
+        <li><span class="num">1</span><h3 data-t="how1t"></h3><p data-t="how1"></p></li>
+        <li><span class="num">2</span><h3 data-t="how2t"></h3><p id="how2"></p></li>
+        <li><span class="num">3</span><h3 data-t="how3t"></h3><p id="how3"></p></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="info" id="info">
+    <div class="wrap info-grid">
+      <div>
+        <h2 data-t="infoTitle"></h2>
+        <ul class="facts" id="facts"></ul>
+        <h3 data-t="contactTitle"></h3>
+        <p id="contactText"></p>
+      </div>
+      <div class="cal-card">
+        <h3 data-t="allDates"></h3>
+        <ul class="cal" id="calList"></ul>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div class="wrap foot-in">
+      <p data-t="footer"></p>
+      <a href="keuken.html" class="foot-link" data-t="kitchen"></a>
+    </div>
+  </footer>
+
+  <!-- Mobile order bar -->
+  <div class="bar" id="bar" hidden>
+    <button type="button" class="bar-btn" id="barBtn">
+      <span class="bar-count" id="barCount"></span>
+      <span data-t="viewOrder"></span>
+      <span class="bar-total" id="barTotal"></span>
+    </button>
+  </div>
+
+  <!-- Order sheet: cart (mobile) → details → done -->
+  <dialog class="sheet" id="sheet" aria-labelledby="sheetTitle">
+    <div class="sheet-head">
+      <button type="button" class="icon-btn" id="sheetBack" aria-label="Terug">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <h2 id="sheetTitle"></h2>
+      <button type="button" class="icon-btn" id="sheetClose" aria-label="Sluiten">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body">
+      <div id="stepCart" class="step"></div>
+
+      <form id="stepDetails" class="step" novalidate>
+        <fieldset>
+          <legend data-t="howGet"></legend>
+          <div class="choice-grid">
+            <label class="choice">
+              <input type="radio" name="method" value="delivery" checked>
+              <span class="choice-box"><strong data-t="delivery"></strong><small id="deliverySub"></small></span>
+            </label>
+            <label class="choice">
+              <input type="radio" name="method" value="pickup">
+              <span class="choice-box"><strong data-t="pickup"></strong><small data-t="pickupSub"></small></span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="grid2" id="addrFields">
+          <div class="field span2">
+            <label for="fStreet" data-t="street"></label>
+            <input id="fStreet" name="street" autocomplete="street-address">
+            <p class="err" data-for="street"></p>
+          </div>
+          <div class="field">
+            <label for="fPostcode" data-t="postcode"></label>
+            <input id="fPostcode" name="postcode" inputmode="numeric" maxlength="4" autocomplete="postal-code">
+            <p class="err" data-for="postcode"></p>
+          </div>
+          <div class="field">
+            <label for="fCity" data-t="city"></label>
+            <input id="fCity" name="city" autocomplete="address-level2">
+            <p class="err" data-for="city"></p>
+          </div>
+          <p class="route-note span2" id="routeNote" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="fDate" data-t="date"></label>
+          <select id="fDate" name="date"></select>
+          <p class="err" data-for="date"></p>
+          <p class="hint" id="dateHint"></p>
+        </div>
+
+        <div class="grid2">
+          <div class="field span2">
+            <label for="fName" data-t="name"></label>
+            <input id="fName" name="name" autocomplete="name">
+            <p class="err" data-for="name"></p>
+          </div>
+          <div class="field">
+            <label for="fEmail" data-t="email"></label>
+            <input id="fEmail" name="email" type="email" autocomplete="email" inputmode="email">
+            <p class="err" data-for="email"></p>
+          </div>
+          <div class="field">
+            <label for="fPhone" data-t="phone"></label>
+            <input id="fPhone" name="phone" type="tel" autocomplete="tel" inputmode="tel">
+            <p class="hint" data-t="phoneHint"></p>
+            <p class="err" data-for="phone"></p>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="fRemarks" data-t="remarks"></label>
+          <textarea id="fRemarks" name="remarks" rows="2"></textarea>
+        </div>
+
+        <fieldset>
+          <legend data-t="payTitle"></legend>
+          <div class="choice-grid three" id="payChoices"></div>
+        </fieldset>
+
+        <!-- Spam trap: humans never see this field -->
+        <div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+
+        <label class="check">
+          <input type="checkbox" name="remember" id="fRemember" checked>
+          <span data-t="remember"></span>
+        </label>
+
+        <div class="summary" id="detailsSummary"></div>
+        <p class="form-err" id="formErr" role="alert" hidden></p>
+        <button type="submit" class="btn btn-primary btn-block" id="placeBtn" data-t="place"></button>
+      </form>
+
+      <div id="stepDone" class="step done"></div>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" defer></script>
+  <script src="config.js" defer></script>
+  <script src="menu.js" defer></script>
+  <script src="i18n.js" defer></script>
+  <script src="shared.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>

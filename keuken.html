@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="nl-BE">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Keuken · Noeni Thai Kitchen</title>
+  <meta name="theme-color" content="#473f00">
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="keuken.css">
+</head>
+<body class="k">
+  <div class="demo-bar" id="demoBar" hidden></div>
+  <header class="top">
+    <div class="wrap top-in">
+      <a class="brand" href="index.html" aria-label="Noeni Thai Kitchen">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span class="brand-name">Noeni Thai<small data-t="kitchen">Kitchen</small></span>
+      </a>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="nl">NL</button>
+        <button type="button" data-lang="en">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Login -->
+  <main class="wrap k-login" id="login" hidden>
+    <form id="loginForm" class="k-card">
+      <h1 data-t="loginTitle"></h1>
+      <p class="muted" data-t="loginText"></p>
+      <div class="field">
+        <label for="key" data-t="key"></label>
+        <input id="key" type="password" autocomplete="current-password" required>
+      </div>
+      <p class="err" id="loginErr"></p>
+      <button class="btn btn-primary btn-block" data-t="login"></button>
+    </form>
+  </main>
+
+  <!-- Dashboard -->
+  <main class="wrap k-main" id="dash" hidden>
+    <div class="k-toolbar">
+      <div class="field">
+        <label for="day" data-t="day"></label>
+        <select id="day"></select>
+      </div>
+      <div class="field">
+        <label for="route" data-t="route"></label>
+        <select id="route"></select>
+      </div>
+      <div class="k-actions">
+        <button type="button" class="btn btn-ghost" id="refresh" data-t="refresh"></button>
+        <button type="button" class="btn btn-ghost" id="csv" data-t="csv"></button>
+        <button type="button" class="btn btn-ghost" id="printSlips" data-t="printSlips"></button>
+      </div>
+    </div>
+
+    <div class="k-stats" id="stats"></div>
+
+    <div class="k-tabs" role="tablist">
+      <button type="button" role="tab" data-tab="cook" data-t="tabCook"></button>
+      <button type="button" role="tab" data-tab="deliver" data-t="tabDeliver"></button>
+      <button type="button" role="tab" data-tab="orders" data-t="tabOrders"></button>
+    </div>
+
+    <section id="tab-cook" class="k-panel"></section>
+    <section id="tab-deliver" class="k-panel"></section>
+    <section id="tab-orders" class="k-panel"></section>
+    <p class="muted k-empty" id="empty" hidden data-t="none"></p>
+  </main>
+
+  <!-- Packing slips, only shown when printing -->
+  <div class="slips" id="slips"></div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script src="config.js" defer></script>
+  <script src="menu.js" defer></script>
+  <script src="shared.js" defer></script>
+  <script src="keuken.js" defer></script>
+</body>
+</html>
