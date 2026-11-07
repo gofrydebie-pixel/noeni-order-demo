@@ -6,7 +6,7 @@
 window.NTK_CONFIG = {
   // Paste the Apps Script web-app URL here after setup (see SETUP.md).
   // Empty = demo mode: orders are only stored in this browser.
-  apiUrl: '',
+  apiUrl: 'https://script.google.com/macros/s/AKfycbwSLhusjBkuFCaZ_QQKI20G_ECG3q9jtze0pUmP6Yrgj3-cr85Wc1r21LrBGTCfmMwM/exec',
 
   business: {
     name: 'Noeni Thai Kitchen',
